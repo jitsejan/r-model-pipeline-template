@@ -1,5 +1,4 @@
-library('randomForest') # classification algorithm
-
+library('randomForest')
 # (1) Read data
 test <- read.csv("/opt/data/test.csv", stringsAsFactors = F)
 # (2) Feature engineering
@@ -22,7 +21,7 @@ test[is.na(test$Age), 'Age'] <- ageImpute[is.na(test$Age)]
 # (4) Load model
 set.seed(754)
 
-load("/opt/models/rf_model.rda")
+rf_model <- readRDS("/opt/models/rf_model.Rds")
 # factor_vars <- names(rf_model$importance[,1])
 factor_vars <- c('Pclass', 'Sex', 'SibSp', 'Parch', 'Title')
 
