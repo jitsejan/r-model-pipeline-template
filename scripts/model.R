@@ -50,3 +50,5 @@ train[factor_vars] <- lapply(train[factor_vars], function(x) as.factor(x))
 
 rf_model <- randomForest(Survived ~ Pclass + Sex + Age + SibSp + Parch + Title,
                          data = train, ntree=500, mtry=2)
+
+save(rf_model, file="/opt/models/rf_model.rda")
