@@ -1,5 +1,3 @@
-# Load packages
-install.packages('randomForest')
 library('randomForest') # classification algorithm
 
 # (1) Read data

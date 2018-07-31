@@ -1,7 +1,7 @@
 version: '2'
 services:
   rbase:
-    image: rocker/r-base
+    image: midockercontainerregistry.azurecr.io/r-model-pipeline-template
     command: Rscript /opt/scripts/model.R
     volumes:
       - ./scripts:/opt/scripts
