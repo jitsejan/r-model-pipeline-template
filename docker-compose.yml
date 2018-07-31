@@ -1,0 +1,8 @@
+version: '2'
+services:
+  rbase:
+    image: rocker/r-base
+    command: Rscript /opt/models/model.R
+    volumes:
+      - ./models:/opt/models
+      - ./data:/opt/data
