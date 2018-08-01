@@ -1,13 +1,15 @@
-model <- readRDS("/app/rf_model.Rds")
+model <- readRDS("/opt/models/rf_model.Rds")
 
 MODEL_VERSION <- "0.0.1"
 VARIABLES <- list(
-  pclass = "Pclass = 1, 2, 3 (Ticket Class: 1st, 2nd, 3rd)",
-  sex = "Sex = male or female",
-  age = "Age = # in years",
+  pclass = "pclass = 1, 2, 3 (Ticket Class: 1st, 2nd, 3rd)",
+  sex = "sex = male or female",
+  age = "age = # in years",
+  sibsp = "sibsp = # of siblings / spouses aboard",
+  parch = "parch = # of parents / children aboard",
+  title = "title = 'Master', 'Miss', 'Mr', 'Mrs', 'Rare Title'",
   gap = "",
   survival = "Successful submission will results in a calculated Survival Probability from 0 to 1 (Unlikely to More Likely)")
-
 
 # test API working --------------------------------------------------------
 

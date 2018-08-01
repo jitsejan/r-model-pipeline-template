@@ -16,6 +16,9 @@ services:
       - ./data:/opt/data
   expose:
     image: midockercontainerregistry.azurecr.io/r-model-pipeline-template
-    command: Rscript /app/plumber.R
+    command: Rscript /opt/scripts/plumber.R
+    volumes:
+      - ./scripts:/opt/scripts
+      - ./models:/opt/models
     ports:
       - 8000:8000

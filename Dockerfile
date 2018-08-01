@@ -8,13 +8,4 @@ RUN useradd plumber \
 	&& chown plumber:plumber /home/plumber \
 	&& addgroup plumber staff
 
-COPY scripts/expose.R /app/expose.R
-COPY scripts/plumber.R /app/plumber.R
-COPY models/rf_model.Rds /app/rf_model.Rds
-
-RUN chmod 700 /app/plumber.R && chgrp -R staff /app
-
-# Plumb your app into 8000
-EXPOSE 8000
-
-# CMD ["/app/plumber.R"]
+USER plumber

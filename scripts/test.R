@@ -22,7 +22,7 @@ test[is.na(test$Age), 'Age'] <- ageImpute[is.na(test$Age)]
 set.seed(754)
 
 rf_model <- readRDS("/opt/models/rf_model.Rds")
-# factor_vars <- names(rf_model$importance[,1])
+# TODO: Read feature names from CSV
 factor_vars <- c('Pclass', 'Sex', 'SibSp', 'Parch', 'Title')
 
 test[factor_vars] <- lapply(test[factor_vars], function(x) as.factor(x))
