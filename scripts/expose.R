@@ -1,3 +1,4 @@
+library('randomForest')
 model <- readRDS("/opt/models/rf_model.Rds")
 
 MODEL_VERSION <- "0.0.1"
@@ -29,13 +30,13 @@ health_check <- function() {
 #* @get /
 #* @html
 home <- function() {
-  title <- "Titanic Survival API"
+  title <- "MarketInvoice - Titanic Survival API"
   body_intro <-  "Welcome to the Titanic Survival API!"
   body_model <- paste("We are currently serving model version:", MODEL_VERSION)
   body_msg <- paste("To received a prediction on survival probability,", 
                      "submit the following variables to the <b>/survival</b> endpoint:",
                      sep = "\n")
-  body_reqs <- paste(VARIABLES, collapse = "<br>")
+  body_reqs <- paste(VARIABLES, collapse = "<br/>")
   
   result <- paste(
     "<html>",
@@ -56,23 +57,31 @@ home <- function() {
 
 # helper functions for predict --------------------------------------------
 
-transform_titantic_data <- function(input_titantic_data) {
-  ouput_titantic_data <- data.frame(
-    pclass = factor(input_titantic_data$Pclass, levels = c(1, 2, 3)),
-    female = tolower(input_titantic_data$Sex) == "female",
-    age = factor(dplyr::if_else(input_titantic_data$Age < 18, "child", "adult", "unknown"), 
-                 levels = c("child", "adult", "unknown"))
+transform_data <- function(input_data) {
+  output_data <- data.frame(
+    Age = input_data$Age,
+    Pclass = factor(input_data$Pclass, levels=c(1, 2, 3)),
+    Sex = factor(input_data$Sex, levels=c("male", "female")),
+    SibSp = input_data$SibSp,
+    Parch = input_data$Parch,
+    Title = factor(input_data$Title, levels=c('Master', 'Miss', 'Mr', 'Mrs', 'Rare Title'))
   )
 }
 
-validate_feature_inputs <- function(age, pclass, sex) {
-  age_valid <- (age >= 0 & age < 200 | is.na(age))
+validate_feature_inputs <- function(age, pclass, sex, sibsp, parch, title) {
+  age_valid <- (age >= 0 & age < 150)
   pclass_valid <- (pclass %in% c(1, 2, 3))
   sex_valid <- (sex %in% c("male", "female"))
-  tests <- c("Age must be between 0 and 200 or NA", 
+  sibsp_valid <- (sibsp >= 0 & sibsp < 30)
+  parch_valid <- (parch >= 0 & parch < 50)
+  title_valid <- (title %in% c('Master', 'Miss', 'Mr', 'Mrs', 'Rare Title'))
+  tests <- c("Age must be between 0 and 150", 
              "Pclass must be 1, 2, or 3", 
-             "Sex must be either male or female")
-  test_results <- c(age_valid, pclass_valid, sex_valid)
+             "Sex must be either male or female",
+             "Number of siblings/spouses should be between 0 and 50",
+             "Number of parents/children should be between 0 and 30",
+             "Title must be 'Master', 'Miss', 'Mr', 'Mrs' or'Rare Title'")
+  test_results <- c(age_valid, pclass_valid, sex_valid, sibsp_valid, parch_valid, title_valid)
   if(!all(test_results)) {
     failed <- which(!test_results)
     return(tests[failed])
@@ -81,30 +90,42 @@ validate_feature_inputs <- function(age, pclass, sex) {
   }
 }
 
-
 # predict endpoint --------------------------------------------------------
 
 #* @post /survival
 #* @get /survival
-predict_survival <- function(Age=NA, Pclass=NULL, Sex=NULL) {
-  age = as.integer(Age)
-  pclass = as.integer(Pclass)
-  sex = tolower(Sex)
-  valid_input <- validate_feature_inputs(age, pclass, sex)
+predict_survival <- function(age=NA, pclass=NULL, sex=NULL, sibsp=0, parch=0, title="") {
+  # Cast the input parameters to the right type
+  age = as.integer(age)
+  pclass = as.integer(pclass)
+  sex = tolower(sex)
+  sibsp = as.integer(sibsp)
+  parch = as.integer(parch)
+  title = tools::toTitleCase(title)
+  # Validate the input
+  valid_input <- validate_feature_inputs(age, pclass, sex, sibsp, parch, title)
   if (valid_input[1] == "OK") {
-    payload <- data.frame(Age=age, Pclass=pclass, Sex=sex)
-    clean_data <- transform_titantic_data(payload)
-    prediction <- predict(model, clean_data, type = "response")
+    payload <- data.frame(Age=age, Pclass=pclass, Sex=sex, SibSp=sibsp, Parch=parch, Title=title)
+    clean_data <- transform_data(payload)
+    prediction <- predict(model, clean_data, type="prob")
     result <- list(
       input = list(payload),
-      response = list("survival_probability" = prediction,
-                      "survival_prediction" = (prediction >= 0.5)
-                      ),
+      response = list(
+          "survival_probability" = prediction[1,2],
+          "survival_prediction" = (prediction[1,2] >= 0.5)
+      ),
       status = 200,
       model_version = MODEL_VERSION)
   } else {
     result <- list(
-      input = list(Age = Age, Pclass = Pclass, Sex = Sex),
+      input = list(
+        age = age,
+        pclass = pclass,
+        sex = sex,
+        sibsp = sibsp,
+        parch = parch,
+        title = title
+      ),
       response = list(input_error = valid_input),
       status = 400,
       model_version = MODEL_VERSION)

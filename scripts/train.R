@@ -21,7 +21,7 @@ ageImpute <- predict(linearMod, train)
 train[is.na(train$Age), 'Age'] <- ageImpute[is.na(train$Age)]
 # (4) Build model
 set.seed(754)
-factor_vars <- c('Survived', 'Pclass', 'Sex', 'SibSp', 'Parch', 'Title')
+factor_vars <- c('Survived', 'Pclass', 'Sex', 'Title')
 train[factor_vars] <- lapply(train[factor_vars], function(x) as.factor(x))
 rf_model <- randomForest(Survived ~ Pclass + Sex + Age + SibSp + Parch + Title,
                          data = train, ntree=500, mtry=2)
