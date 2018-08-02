@@ -9,3 +9,9 @@ RUN useradd plumber \
 	&& addgroup plumber staff
 
 USER plumber
+# Copy files
+COPY scripts/expose.R /opt/scripts/
+COPY scripts/plumber.R /opt/scripts/
+COPY models/rf_model.Rds /opt/models/
+# Serve
+CMD ["Rscript", "/opt/scripts/plumber.R"]

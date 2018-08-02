@@ -30,7 +30,7 @@ health_check <- function() {
 #* @get /
 #* @html
 home <- function() {
-  title <- "MarketInvoice - Titanic Survival API"
+  title <- "Titanic Survival API"
   body_intro <-  "Welcome to the Titanic Survival API!"
   body_model <- paste("We are currently serving model version:", MODEL_VERSION)
   body_msg <- paste("To received a prediction on survival probability,", 
